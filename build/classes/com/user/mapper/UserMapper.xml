@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- mybatis-3-mapper.dtd文件在mybatis-3.5.2.jar的\org\apache\ibatis\builder\xml目录下 -->
+<!DOCTYPE mapper PUBLIC "//UNKNOWN/" "mybatis-3-mapper.dtd">
+
+<mapper namespace="com.user.mapper.UserMapper">
+
+	<select id="findGoodsById" parameterType="Integer" resultType="bean.Goods">
+		select * from tb_Goods where userId=#{userId}
+	</select>
+	
+	<select id="findGoodsByUsername" parameterType="String" resultType="bean.Goods">
+		select * from tb_Goods where username=#{username}
+	</select>
+	
+	<select id="findUsers" parameterType="String" resultType="bean.Goods">
+		select * from tb_Goods 
+		where concat_ws(username, job, num) like concat('%', '${search}', '%') order by username
+		<!-- 注意有无单引号：concat('%', '${search}', '%')，concat('%', #{search}, '%') -->
+		<!-- ${arg}为原样输出。若用concat('%', #{search}, '%')也行，但不能防止SQL注入式攻击 -->
+		<!-- #{arg}为使用PreparedStatement（预处理。默认被采用的方式）进行占位符替换 -->
+	</select>
+	
+	<select id="getGoodsList" resultType="bean.Goods">
+		select * from tb_Goods order by username
+	</select>
+	
+	<insert id="addUser" parameterType="bean.Goods"
+			useGeneratedKeys="true" keyProperty="userId" >
+		insert into tb_Goods (username, job, phone) 
+		values (#{username}, #{num}, #{phone})
+	</insert>
+	
+	<update id="updateUser" parameterType="bean.Goods">
+		update tb_Goods set username=#{username}, job=#{num}, phone=#{phone}, timeRenew=(now()) 
+		where userId=#{userId}
+	</update>
+	
+	<delete id="deleteUser" parameterType="Integer">
+		delete from tb_Goods where userId=#{userId}
+	</delete>
+	
+	
+	<!-- 以下二选一 ，为了测试动态SQL的映射： -->
+	<!-- (1) 以下：都会执行其test能成立的条件语句 -->	
+<!-- 	<select id="findUsersByUsernameAndJob" parameterType="com.user.po.User" resultType="com.user.po.User"> -->
+<!-- 		select * from tb_User where 1=1  -->
+<!-- 		<if test="username != null and username != ''"> -->
+<!-- 			and username like  concat('%', '${username}', '%') -->
+<!-- 		</if>  -->
+<!-- 		<if test="job != null and job != ''"> -->
+<!-- 			and job like  concat('%', '${job}', '%') -->
+<!-- 		</if> -->
+<!-- 	</select> -->
+
+	<!-- (2) 以下：可省略where 1=1语句 -->
+	<!-- (2) 以下：只执行最前的、test能成立的那个条件语句 -->
+	<select id="findUsersByUsernameAndJob" parameterType="bean.Goods" resultType="bean.Goods">
+		select * from tb_Goods
+		<where>								
+			<choose>						
+				<when test="username != null and username != ''">
+					and username like  concat('%', '${username}', '%')
+				</when>
+				<when test="job != null and job != ''">
+					and job like  concat('%', '${job}', '%')
+				</when>
+				<otherwise>
+					and length(phone) > 4
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+</mapper>

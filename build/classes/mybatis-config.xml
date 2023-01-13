@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- mybatis-3-config.dtd文件在mybatis-3.5.2.jar的\org\apache\ibatis\builder\xml目录下 -->
+<!-- <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd"> -->
+<!DOCTYPE configuration  PUBLIC "//UNKNOWN/" "mybatis-3-config.dtd">
+
+<configuration>								<!-- 子标签的排列讲究先后顺序 -->
+	
+	<environments default="db_user666">
+		<environment id="db_user666">
+			<transactionManager type="JDBC" />
+			
+			<dataSource type="POOLED">
+				<property name="driver"   value="com.mysql.jdbc.Driver" />
+				<property name="url" 	  value="jdbc:mysql://localhost:3306/testdb?useSSL=false" />
+				<property name="username" value="root" />
+				<property name="password" value="" />
+			</dataSource>
+		</environment>
+	</environments>
+	
+	<mappers>
+		<mapper resource="com/user/mapper/UserMapper.xml" />
+	</mappers>
+</configuration>
